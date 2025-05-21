@@ -1,0 +1,12 @@
+#!/usr/bin/env php
+<?php
+require __DIR__ . '/../vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use FlowCore\Command\DispatchJobCommand;
+use FlowCore\Command\StartWorkerCommand;
+
+$application = new Application('FlowCore', '0.1.0');
+$application->add(new DispatchJobCommand());
+$application->add(new StartWorkerCommand());
+$application->run();
