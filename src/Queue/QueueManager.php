@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Queue;
 
-class QueueManager
+final readonly class QueueManager
 {
     public function __construct(private QueueInterface $queue) {}
 

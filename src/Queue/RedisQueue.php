@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Queue;
 
 use FlowCore\Storage\RedisClient;
 
-class RedisQueue implements QueueInterface
+final class RedisQueue implements QueueInterface
 {
     private string $queueKey = 'flowcore:queue';
 
-    public function __construct(private RedisClient $redis) {}
+    public function __construct(private readonly RedisClient $redis) {}
 
     public function enqueue(array $job): void
     {
@@ -18,6 +20,7 @@ class RedisQueue implements QueueInterface
     public function dequeue(): ?array
     {
         $job = $this->redis->client()->lpop($this->queueKey);
+
         return $job ? json_decode($job, true) : null;
     }
 }

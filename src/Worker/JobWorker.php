@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Worker;
 
 use FlowCore\Job\Registry;
 use FlowCore\Queue\QueueManager;
 
-class JobWorker
+final readonly class JobWorker
 {
     public function __construct(
         private QueueManager $queueManager,
@@ -16,8 +18,9 @@ class JobWorker
     {
         while (true) {
             $jobData = $this->queueManager->dequeue();
-            if (!$jobData) {
+            if ($jobData === null || $jobData === []) {
                 usleep(500000); // wait 0.5s
+
                 continue;
             }
 

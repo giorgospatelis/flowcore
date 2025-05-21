@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Job;
 
-class Registry
+use RuntimeException;
+
+final class Registry
 {
-    protected array $map = [];
+    private array $map = [];
 
     public function register(string $name, string $class): void
     {
@@ -13,8 +17,8 @@ class Registry
 
     public function resolve(string $name): JobInterface
     {
-        if (!isset($this->map[$name])) {
-            throw new \RuntimeException("Job '$name' not found.");
+        if (! isset($this->map[$name])) {
+            throw new RuntimeException("Job '$name' not found.");
         }
 
         return new ($this->map[$name])();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Command;
 
 use FlowCore\Job\Registry;
@@ -13,7 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(name: 'work')]
-class StartWorkerCommand extends Command
+final class StartWorkerCommand extends Command
 {
     protected function configure(): void
     {
@@ -36,8 +38,9 @@ class StartWorkerCommand extends Command
             $registry
         );
 
-        $output->writeln("<info>Worker started. Waiting for jobs...</info>");
+        $output->writeln('<info>Worker started. Waiting for jobs...</info>');
         $worker->run();
+
         return Command::SUCCESS;
     }
 }

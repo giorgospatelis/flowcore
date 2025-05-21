@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Command;
 
 use FlowCore\Dispatcher\JobDispatcher;
@@ -13,7 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(name: 'dispatch:job')]
-class DispatchJobCommand extends Command
+final class DispatchJobCommand extends Command
 {
     protected function configure(): void
     {
@@ -40,6 +42,7 @@ class DispatchJobCommand extends Command
         $dispatcher->dispatch($name, $payload, $delay);
 
         $output->writeln("<info>Dispatched job '$name'</info>");
+
         return Command::SUCCESS;
     }
 }

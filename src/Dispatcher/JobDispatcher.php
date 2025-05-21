@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Dispatcher;
 
 use FlowCore\Queue\QueueManager;
 
-class JobDispatcher
+final readonly class JobDispatcher
 {
     public function __construct(private QueueManager $queueManager) {}
 
@@ -14,7 +16,7 @@ class JobDispatcher
             'name' => $name,
             'payload' => $payload,
             'dispatched_at' => time(),
-            'delay_until' => $delaySeconds ? time() + $delaySeconds : null,
+            'delay_until' => $delaySeconds !== null && $delaySeconds !== 0 ? time() + $delaySeconds : null,
         ];
         $this->queueManager->enqueue($job);
     }

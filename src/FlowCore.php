@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore;
 
 use Dotenv\Dotenv;
 
-class FlowCore
+final class FlowCore
 {
     public static function initialize(): void
     {
-        if (file_exists(getcwd() . '/.env')) {
+        if (file_exists(getcwd().'/.env')) {
             $dotenv = Dotenv::createImmutable(getcwd());
             $dotenv->load();
         }
 
-        $libEnvPath = __DIR__ . '/../.env.defaults';
+        $libEnvPath = __DIR__.'/../.env.defaults';
         if (file_exists($libEnvPath)) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+            $dotenv = Dotenv::createImmutable(__DIR__.'/../');
             $dotenv->load();
         }
     }
