@@ -10,8 +10,9 @@ final class FlowCore
 {
     public static function initialize(): void
     {
-        if (file_exists(getcwd().'/.env')) {
-            $dotenv = Dotenv::createImmutable(getcwd());
+        $cwd = getcwd();
+        if ($cwd !== false && file_exists($cwd.'/.env')) {
+            $dotenv = Dotenv::createImmutable($cwd);
             $dotenv->load();
         }
 

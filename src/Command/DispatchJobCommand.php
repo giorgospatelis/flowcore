@@ -25,11 +25,42 @@ final class DispatchJobCommand extends Command
             ->addArgument('delay', InputArgument::OPTIONAL, 'Delay in seconds', 0);
     }
 
+    /**
+     * Execute the command to dispatch a job.
+     *
+     * @param  InputInterface  $input  The input interface containing command arguments.
+     * @param  OutputInterface  $output  The output interface for displaying messages.
+     * @return int Command exit code.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $name = $input->getArgument('name');
-        $payload = json_decode($input->getArgument('payload') ?? '{}', true);
-        $delay = (int) $input->getArgument('delay');
+        $nameArg = $input->getArgument('name');
+        $payloadArg = $input->getArgument('payload');
+        $delayArg = $input->getArgument('delay');
+
+        if (! is_string($nameArg)) {
+            $output->writeln('<error>Job name must be a string</error>');
+
+            return Command::FAILURE;
+        }
+        $name = trim($nameArg);
+        $payloadJson = is_string($payloadArg) ? $payloadArg : '{}';
+        $payload = json_decode($payloadJson, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $output->writeln('<error>Invalid JSON payload: '.json_last_error_msg().'</error>');
+
+            return Command::FAILURE;
+        }
+        if (! is_array($payload) || array_is_list($payload)) {
+            $output->writeln('<error>Payload must be a JSON object</error>');
+
+            return Command::FAILURE;
+        }
+
+        $delay = 0;
+        if (is_numeric($delayArg)) {
+            $delay = (int) $delayArg;
+        }
 
         $dispatcher = new JobDispatcher(
             new QueueManager(

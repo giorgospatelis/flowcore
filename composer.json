@@ -36,8 +36,9 @@
         "bin/flowcore"
     ],
     "require-dev": {
-        "phpunit/phpunit": "^10.5",
         "laravel/pint": "^1.22",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5",
         "rector/rector": "^2.0.16"
     },
     "scripts": {

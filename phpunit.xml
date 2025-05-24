@@ -14,4 +14,8 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <env name="FLOWCORE_REDIS_HOST" value="redis" />
+        <env name="FLOWCORE_REDIS_PORT" value="6379" />
+    </php>
 </phpunit>
