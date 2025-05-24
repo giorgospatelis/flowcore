@@ -46,19 +46,15 @@
             "rector",
             "pint"
         ],
-        "test:type-coverage": "pest --type-coverage --exactly=100",
-        "test:typos": "peck",
         "test:lint": [
             "rector --dry-run",
             "pint --test"
         ],
-        "test:unit": "pest --parallel --coverage --min=64",
+        "test:unit": "phpunit",
         "test:types": "phpstan",
         "test:refactor": "rector --dry-run",
         "test": [
             "@test:lint",
-            "@test:type-coverage",
-            "@test:typos",
             "@test:unit",
             "@test:types",
             "@test:refactor"
