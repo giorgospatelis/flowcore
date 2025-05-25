@@ -6,13 +6,10 @@ use FlowCore\Contracts\JobPayloadInterface;
 use FlowCore\Contracts\QueueDriverInterface;
 use Predis\Client;
 
-final class RedisDriver implements QueueDriverInterface
+final readonly class RedisDriver implements QueueDriverInterface
 {
-    private Client $redis;
-
-    public function __construct(Client $redis)
+    public function __construct(private Client $redis)
     {
-        $this->redis = $redis;
     }
 
     public function push(string $queue, JobPayloadInterface $job): void
@@ -39,7 +36,7 @@ final class RedisDriver implements QueueDriverInterface
     public function ack(string $queue, string $jobId): void
     {
         // Acknowledge the job by removing it from the Redis hash
-        $this->redis->hdel("job:{$jobId}", 'data', 'status');
+        $this->redis->hdel("job:{$jobId}", 'data');
     }
 
     public function nack(string $queue, string $jobId): void
@@ -131,9 +128,9 @@ final class RedisDriver implements QueueDriverInterface
         return false; // Redis does not support streaming in the context of job processing
     }
 
-    private function processDelayed(string $queue): void
+    public function supportsBatchOperations(): bool
     {
-        // This method would handle processing delayed jobs, but is not implemented in this driver
+        return false; // Redis does not support batch operations in this implementation
     }
 
 }

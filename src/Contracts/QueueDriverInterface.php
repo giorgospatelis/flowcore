@@ -59,4 +59,6 @@ interface QueueDriverInterface
     public function supportsTransactions(): bool;
 
     public function supportsStreaming(): bool;
+
+    public function supportsBatchOperations(): bool;
 }

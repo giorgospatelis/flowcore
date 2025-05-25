@@ -9,15 +9,12 @@ use FlowCore\Contracts\JobPayloadInterface;
 use FlowCore\Contracts\QueueDriverInterface;
 use PDO;
 
-final class DatabaseDriver implements QueueDriverInterface
+final readonly class DatabaseDriver implements QueueDriverInterface
 {
-    private PDO $pdo;
-
     private string $table;
 
-    public function __construct(PDO $pdo, array $config = [])
+    public function __construct(private PDO $pdo, array $config = [])
     {
-        $this->pdo = $pdo;
         $this->table = $config['table'] ?? 'queue_jobs';
         $this->ensureTableExists();
     }
@@ -145,9 +142,7 @@ final class DatabaseDriver implements QueueDriverInterface
         $stmt->execute([':queue' => $queue, ':timestamp' => $timestamp]);
         $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return array_map(function ($jobData) {
-            return JobPayloadInterface::unserialize($jobData['data']);
-        }, $jobs);
+        return array_map(fn(array $jobData): \FlowCore\Contracts\JobPayloadInterface => JobPayloadInterface::unserialize($jobData['data']), $jobs);
     }
 
     public function pushBatch(string $queue, array $payloads): array
@@ -178,9 +173,7 @@ final class DatabaseDriver implements QueueDriverInterface
             $this->ack($queue, $jobData['job_id']);
         }
 
-        return array_map(function ($jobData) {
-            return JobPayloadInterface::unserialize($jobData['data']);
-        }, $jobsData);
+        return array_map(fn(array $jobData): \FlowCore\Contracts\JobPayloadInterface => JobPayloadInterface::unserialize($jobData['data']), $jobsData);
     }
 
     public function supportsPriority(): bool
@@ -201,6 +194,11 @@ final class DatabaseDriver implements QueueDriverInterface
     public function supportsStreaming(): bool
     {
         return false; // Database driver does not support streaming
+    }
+
+    public function supportsBatchOperations(): bool
+    {
+        return true; // Database driver supports batch operations
     }
 
     private function generateId(): string

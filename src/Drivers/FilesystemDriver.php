@@ -13,16 +13,13 @@ use RuntimeException;
 
 final class FilesystemDriver implements QueueDriverInterface
 {
-    private string $basePath;
-
-    private int $lockTimeout;
+    private readonly string $basePath;
 
     private array $openFiles = []; // File handle cache
 
-    public function __construct(string $basePath, array $config = [])
+    public function __construct(string $basePath)
     {
         $this->basePath = rtrim($basePath, DIRECTORY_SEPARATOR);
-        $this->lockTimeout = $config['lock_timeout'] ?? 5;
 
         $this->ensureDirectoryExists($this->basePath);
     }
@@ -376,7 +373,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
         for ($i = 0; $i < $count; $i++) {
             $job = $this->pop($queue, 0);
-            if ($job === null) {
+            if (!$job instanceof \FlowCore\Contracts\JobPayloadInterface) {
                 break;
             }
             $jobs[] = $job;
@@ -403,6 +400,11 @@ final class FilesystemDriver implements QueueDriverInterface
     public function supportsStreaming(): bool
     {
         return false;
+    }
+
+    public function supportsBatchOperations(): bool
+    {
+        return true; // Batch operations are supported
     }
 
     // Helper Methods
@@ -470,7 +472,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
     private function addToQueueIndex(string $queue, string $jobId, int $availableAt): void
     {
-        $this->modifyIndex($this->getQueueIndexPath($queue), function ($index) use ($jobId, $availableAt) {
+        $this->modifyIndex($this->getQueueIndexPath($queue), function (array $index) use ($jobId, $availableAt): array {
             $index[$jobId] = $availableAt;
             asort($index); // Sort by available time
 
@@ -480,7 +482,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
     private function removeFromQueueIndex(string $queue, string $jobId): void
     {
-        $this->modifyIndex($this->getQueueIndexPath($queue), function ($index) use ($jobId) {
+        $this->modifyIndex($this->getQueueIndexPath($queue), function (array $index) use ($jobId): array {
             unset($index[$jobId]);
 
             return $index;
@@ -489,7 +491,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
     private function addToProcessingIndex(string $queue, string $jobId): void
     {
-        $this->modifyIndex($this->getProcessingIndexPath($queue), function ($index) use ($jobId) {
+        $this->modifyIndex($this->getProcessingIndexPath($queue), function (array $index) use ($jobId) {
             $index[$jobId] = time();
 
             return $index;
@@ -498,7 +500,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
     private function removeFromProcessingIndex(string $queue, string $jobId): void
     {
-        $this->modifyIndex($this->getProcessingIndexPath($queue), function ($index) use ($jobId) {
+        $this->modifyIndex($this->getProcessingIndexPath($queue), function (array $index) use ($jobId): array {
             unset($index[$jobId]);
 
             return $index;
@@ -507,7 +509,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
     private function addToDelayedIndex(string $queue, string $jobId, int $availableAt): void
     {
-        $this->modifyIndex($this->getDelayedIndexPath($queue), function ($index) use ($jobId, $availableAt) {
+        $this->modifyIndex($this->getDelayedIndexPath($queue), function (array $index) use ($jobId, $availableAt): array {
             $index[$jobId] = $availableAt;
             asort($index);
 
@@ -588,7 +590,7 @@ final class FilesystemDriver implements QueueDriverInterface
             return;
         }
 
-        $this->modifyIndex($delayedPath, function ($delayed) use ($queue) {
+        $this->modifyIndex($delayedPath, function ($delayed) use ($queue): array {
             $now = time();
             $ready = [];
             $remaining = [];

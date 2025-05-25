@@ -8,7 +8,6 @@ use PRedis\Client as RedisClient;
 class DriverFactory
 {
     private array $drivers = [];
-    private array $configs = [];
 
     public function register(string $name, string $class): void
     {
@@ -35,7 +34,7 @@ class DriverFactory
     private function createRedisConnection(array $config): RedisClient
     {
         $redis = new RedisClient();
-        $redis->connect($config['host'] ?? '127.0.0.1', $config['port'] ?? 6379);
+        $redis->connect();
 
         if (isset($config['password'])) {
             $redis->auth($config['password']);
