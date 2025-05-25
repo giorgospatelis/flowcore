@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FlowCore\Drivers;
 
 use FlowCore\Contracts\JobPayloadInterface;
@@ -42,11 +44,6 @@ final readonly class RedisDriver implements QueueDriverInterface
     public function nack(string $queue, string $jobId): void
     {
         // No action needed for nack in Redis as jobs are not removed from the queue
-    }
-
-    private function generateId(): string
-    {
-        return uniqid('job_', true);
     }
 
     public function get(string $queue, string $jobId): ?JobPayloadInterface
@@ -133,4 +130,8 @@ final readonly class RedisDriver implements QueueDriverInterface
         return false; // Redis does not support batch operations in this implementation
     }
 
+    private function generateId(): string
+    {
+        return uniqid('job_', true);
+    }
 }

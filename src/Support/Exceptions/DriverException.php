@@ -6,5 +6,6 @@ namespace FlowCore\Support\Exceptions;
 
 use Exception;
 
-
-class DriverException extends Exception {}
+final class DriverException extends Exception
+{
+}

@@ -8,6 +8,7 @@ use FlowCore\Contracts\QueueDriverInterface;
 use FlowCore\Contracts\QueueManagerInterface;
 use FlowCore\Support\Exceptions\QueueException;
 use InvalidArgumentException;
+use Throwable;
 
 final class QueueManager implements QueueManagerInterface
 {
@@ -47,9 +48,9 @@ final class QueueManager implements QueueManagerInterface
             }
 
             return $payload->getId();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to push job to queue '{$queue}': " . $e->getMessage(),
+                "Failed to push job to queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -72,10 +73,11 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             $driver->later($queue, $payload, $delay);
+
             return $payload->getId();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to schedule job on queue '{$queue}': " . $e->getMessage(),
+                "Failed to schedule job on queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -92,14 +94,14 @@ final class QueueManager implements QueueManagerInterface
         try {
             $payload = $driver->pop($queue, $timeout);
 
-            if (!$payload instanceof \FlowCore\Contracts\JobPayloadInterface) {
+            if (! $payload instanceof \FlowCore\Contracts\JobPayloadInterface) {
                 return null;
             }
 
             return Job::fromPayload($payload);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to pop job from queue '{$queue}': " . $e->getMessage(),
+                "Failed to pop job from queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -145,9 +147,9 @@ final class QueueManager implements QueueManagerInterface
             }
 
             return $jobIds;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to bulk push jobs to queue '{$queue}': " . $e->getMessage(),
+                "Failed to bulk push jobs to queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -162,9 +164,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             return $driver->size($queue);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to get size of queue '{$queue}': " . $e->getMessage(),
+                "Failed to get size of queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -179,9 +181,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             $driver->clear($queue);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to clear queue '{$queue}': " . $e->getMessage(),
+                "Failed to clear queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -194,9 +196,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             return $driver->queues();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to get queues: " . $e->getMessage(),
+                'Failed to get queues: '.$e->getMessage(),
                 0,
                 $e
             );
@@ -212,9 +214,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             $driver->ack($queue, $jobId);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to acknowledge job '{$jobId}' on queue '{$queue}': " . $e->getMessage(),
+                "Failed to acknowledge job '{$jobId}' on queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -230,9 +232,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             $driver->nack($queue, $jobId);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to reject job '{$jobId}' on queue '{$queue}': " . $e->getMessage(),
+                "Failed to reject job '{$jobId}' on queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -249,9 +251,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             $driver->release($queue, $jobId, $delay);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to release job '{$jobId}' on queue '{$queue}': " . $e->getMessage(),
+                "Failed to release job '{$jobId}' on queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -267,9 +269,9 @@ final class QueueManager implements QueueManagerInterface
 
         try {
             return $driver->delete($queue, $jobId);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to delete job '{$jobId}' from queue '{$queue}': " . $e->getMessage(),
+                "Failed to delete job '{$jobId}' from queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -286,14 +288,14 @@ final class QueueManager implements QueueManagerInterface
         try {
             $payload = $driver->get($queue, $jobId);
 
-            if (!$payload instanceof \FlowCore\Contracts\JobPayloadInterface) {
+            if (! $payload instanceof \FlowCore\Contracts\JobPayloadInterface) {
                 return null;
             }
 
             return Job::fromPayload($payload);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             throw new QueueException(
-                "Failed to find job '{$jobId}' on queue '{$queue}': " . $e->getMessage(),
+                "Failed to find job '{$jobId}' on queue '{$queue}': ".$e->getMessage(),
                 0,
                 $e
             );
@@ -309,7 +311,7 @@ final class QueueManager implements QueueManagerInterface
         $this->connections[$name] = $driver;
     }
 
-    public function connection(string $name = null): QueueDriverInterface
+    public function connection(?string $name = null): QueueDriverInterface
     {
         return $this->resolveConnection($name);
     }
@@ -323,7 +325,7 @@ final class QueueManager implements QueueManagerInterface
         $this->defaultConnection = $name;
     }
 
-    public function getConnectionInfo(string $name = null): array
+    public function getConnectionInfo(?string $name = null): array
     {
         $connectionName = $name ?? $this->defaultConnection;
         $driver = $this->resolveConnection($connectionName);
@@ -334,7 +336,7 @@ final class QueueManager implements QueueManagerInterface
             'supports_priority' => $driver->supportsPriority(),
             'supports_delayed' => $driver->supportsDelayed(),
             'supports_transactions' => $driver->supportsTransactions(),
-            'supports_streaming' => $driver->supportsStreaming()
+            'supports_streaming' => $driver->supportsStreaming(),
         ];
     }
 
@@ -354,7 +356,7 @@ final class QueueManager implements QueueManagerInterface
                     'size' => $this->size($queue),
                     'connection' => $this->defaultConnection,
                 ];
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $stats[$queue] = [
                     'size' => null,
                     'error' => $e->getMessage(),
@@ -389,11 +391,11 @@ final class QueueManager implements QueueManagerInterface
         return $this->defaultConnection;
     }
 
-    private function resolveConnection(string $name = null): QueueDriverInterface
+    private function resolveConnection(?string $name = null): QueueDriverInterface
     {
         $connectionName = $name ?? $this->defaultConnection;
 
-        if (!isset($this->connections[$connectionName])) {
+        if (! isset($this->connections[$connectionName])) {
             throw new QueueException("Queue connection '{$connectionName}' not found");
         }
 
@@ -402,7 +404,7 @@ final class QueueManager implements QueueManagerInterface
 
     private function generateJobId(): string
     {
-        return uniqid('job_', true) . '_' . mt_rand(1000, 9999);
+        return uniqid('job_', true).'_'.mt_rand(1000, 9999);
     }
 
     private function validateQueue(string $queue): void
@@ -436,9 +438,9 @@ final class QueueManager implements QueueManagerInterface
     private function validateJobsArray(array $jobs): void
     {
         foreach ($jobs as $index => $job) {
-            if (!$job instanceof Job) {
+            if (! $job instanceof Job) {
                 throw new InvalidArgumentException(
-                    "Job at index {$index} must be an instance of " . Job::class
+                    "Job at index {$index} must be an instance of ".Job::class
                 );
             }
         }

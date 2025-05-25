@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Core;
 
+use FlowCore\Contracts\JobPayloadInterface;
 use FlowCore\Core\Job;
 use FlowCore\Core\JobPayload;
-use FlowCore\Contracts\JobPayloadInterface;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use Throwable;
 use Tests\Support\TestQueueJob;
+use Throwable;
 
-class TestJobWithFailureHandling extends Job
+final class TestJobWithFailureHandling extends Job
 {
     public bool $failureHandled = false;
+
     public ?Throwable $failureException = null;
 
     public function handle(): void
@@ -35,9 +36,11 @@ class TestJobWithFailureHandling extends Job
     }
 }
 
-class TestJobWithCustomRetry extends Job
+final class TestJobWithCustomRetry extends Job
 {
-    public function handle(): void {}
+    public function handle(): void
+    {
+    }
 
     public function shouldRetry(Throwable $exception): bool
     {
@@ -290,7 +293,7 @@ final class JobTest extends TestCase
     {
         $data = [
             'message' => 'Restored message',
-            'userId' => 789
+            'userId' => 789,
         ];
 
         $options = [
@@ -300,7 +303,7 @@ final class JobTest extends TestCase
             'retry_delay' => 15,
             'priority' => 8,
             'timeout' => 180,
-            'class' => TestQueueJob::class
+            'class' => TestQueueJob::class,
         ];
 
         $payload = new JobPayload($data, $options);
@@ -350,7 +353,7 @@ final class JobTest extends TestCase
 
         $this->assertSame([
             'message' => 'Hello World',
-            'userId' => 123
+            'userId' => 123,
         ], $serialized);
 
         // Ensure metadata is excluded
@@ -394,19 +397,23 @@ final class JobTest extends TestCase
 
     public function test_job_with_private_properties(): void
     {
-        $job = new class('test') extends Job {
+        $job = new class ('test') extends Job {
             private readonly string $privateValue;
+
             protected string $protectedValue;
+
             public string $publicValue;
 
             public function __construct(string $value)
             {
-                $this->privateValue = $value . '_private';
-                $this->protectedValue = $value . '_protected';
-                $this->publicValue = $value . '_public';
+                $this->privateValue = $value.'_private';
+                $this->protectedValue = $value.'_protected';
+                $this->publicValue = $value.'_public';
             }
 
-            public function handle(): void {}
+            public function handle(): void
+            {
+            }
 
             public function getPrivateValue(): string
             {
@@ -434,7 +441,7 @@ final class JobTest extends TestCase
         $payload = new JobPayload([
             'message' => 'Test',
             'userId' => 456,
-            'nonExistentProperty' => 'should be ignored'
+            'nonExistentProperty' => 'should be ignored',
         ], ['class' => TestQueueJob::class]);
 
         $job = TestQueueJob::fromPayload($payload);

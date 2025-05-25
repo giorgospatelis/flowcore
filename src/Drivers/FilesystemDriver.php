@@ -373,7 +373,7 @@ final class FilesystemDriver implements QueueDriverInterface
 
         for ($i = 0; $i < $count; $i++) {
             $job = $this->pop($queue, 0);
-            if (!$job instanceof \FlowCore\Contracts\JobPayloadInterface) {
+            if (! $job instanceof JobPayloadInterface) {
                 break;
             }
             $jobs[] = $job;

@@ -8,11 +8,14 @@ use FlowCore\Contracts\JobPayloadInterface;
 use InvalidArgumentException;
 use JsonException;
 
-class JobPayload implements JobPayloadInterface
+final class JobPayload implements JobPayloadInterface
 {
     private string $id = '';
+
     private array $data;
+
     private array $options;
+
     private int $attempts = 0;
 
     public function __construct(array $data = [], array $options = [])
@@ -33,7 +36,7 @@ class JobPayload implements JobPayloadInterface
         try {
             $decoded = json_decode($data, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw new InvalidArgumentException('Invalid JSON data provided: ' . $e->getMessage(), 0, $e);
+            throw new InvalidArgumentException('Invalid JSON data provided: '.$e->getMessage(), 0, $e);
         }
 
         if (! is_array($decoded)) {
@@ -48,19 +51,19 @@ class JobPayload implements JobPayloadInterface
             }
         }
 
-        if (!is_string($decoded['id'])) {
+        if (! is_string($decoded['id'])) {
             throw new InvalidArgumentException('Job ID must be a string');
         }
 
-        if (!is_array($decoded['data'])) {
+        if (! is_array($decoded['data'])) {
             throw new InvalidArgumentException('Job data must be an array');
         }
 
-        if (!is_array($decoded['options'])) {
+        if (! is_array($decoded['options'])) {
             throw new InvalidArgumentException('Job options must be an array');
         }
 
-        if (!is_int($decoded['attempts']) || $decoded['attempts'] < 0) {
+        if (! is_int($decoded['attempts']) || $decoded['attempts'] < 0) {
             throw new InvalidArgumentException('Job attempts must be a non-negative integer');
         }
 
@@ -123,7 +126,7 @@ class JobPayload implements JobPayloadInterface
                 'attempts' => $this->attempts,
             ], JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw new InvalidArgumentException('Failed to serialize job payload: ' . $e->getMessage(), 0, $e);
+            throw new InvalidArgumentException('Failed to serialize job payload: '.$e->getMessage(), 0, $e);
         }
     }
 
@@ -167,7 +170,7 @@ class JobPayload implements JobPayloadInterface
         try {
             json_encode($data, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw new InvalidArgumentException('Job data must be JSON serializable: ' . $e->getMessage(), 0, $e);
+            throw new InvalidArgumentException('Job data must be JSON serializable: '.$e->getMessage(), 0, $e);
         }
     }
 
@@ -176,19 +179,19 @@ class JobPayload implements JobPayloadInterface
         try {
             json_encode($options, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            throw new InvalidArgumentException('Job options must be JSON serializable: ' . $e->getMessage(), 0, $e);
+            throw new InvalidArgumentException('Job options must be JSON serializable: '.$e->getMessage(), 0, $e);
         }
 
         // Validate specific option types if they exist
-        if (isset($options['priority']) && (!is_int($options['priority']) || $options['priority'] < 0)) {
+        if (isset($options['priority']) && (! is_int($options['priority']) || $options['priority'] < 0)) {
             throw new InvalidArgumentException('Priority must be a non-negative integer');
         }
 
-        if (isset($options['delay']) && (!is_int($options['delay']) || $options['delay'] < 0)) {
+        if (isset($options['delay']) && (! is_int($options['delay']) || $options['delay'] < 0)) {
             throw new InvalidArgumentException('Delay must be a non-negative integer');
         }
 
-        if (isset($options['max_attempts']) && (!is_int($options['max_attempts']) || $options['max_attempts'] < 1)) {
+        if (isset($options['max_attempts']) && (! is_int($options['max_attempts']) || $options['max_attempts'] < 1)) {
             throw new InvalidArgumentException('Max attempts must be a positive integer');
         }
     }

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace FlowCore\Core;
 
+use FlowCore\Contracts\JobPayloadInterface;
+use InvalidArgumentException;
 use JsonSerializable;
-use Throwable;
 use ReflectionClass;
 use ReflectionProperty;
-use InvalidArgumentException;
-use FlowCore\Contracts\JobPayloadInterface;
+use Throwable;
 
 abstract class Job implements JsonSerializable
 {
@@ -56,6 +56,44 @@ abstract class Job implements JsonSerializable
     abstract public function handle(): void;
 
     /**
+     * Create a Job instance from a JobPayload.
+     */
+    final public static function fromPayload(JobPayloadInterface $payload): static
+    {
+        $data = $payload->getData();
+        $options = $payload->getOptions();
+
+        // Get the job class from options
+        $jobClass = $options['class'] ?? static::class;
+
+        if (! class_exists($jobClass)) {
+            throw new InvalidArgumentException("Job class {$jobClass} does not exist");
+        }
+
+        if (! is_subclass_of($jobClass, self::class)) {
+            throw new InvalidArgumentException("Job class {$jobClass} must extend ".self::class);
+        }
+
+        // Create job instance
+        $job = new $jobClass();
+
+        // Restore job state from data
+        $job->restoreFromData($data);
+
+        // Restore job metadata
+        $job->id = $payload->getId();
+        $job->attempts = $payload->getAttempts();
+        $job->queue = $options['queue'] ?? 'default';
+        $job->delay = $options['delay'] ?? 0;
+        $job->maxAttempts = $options['max_attempts'] ?? 1;
+        $job->retryDelay = $options['retry_delay'] ?? 0;
+        $job->priority = $options['priority'] ?? 0;
+        $job->timeout = $options['timeout'] ?? 60;
+
+        return $job;
+    }
+
+    /**
      * Handle job failure.
      */
     public function failed(Throwable $exception): void
@@ -74,7 +112,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the job's unique identifier.
      */
-    public function getId(): string
+    final public function getId(): string
     {
         return $this->id;
     }
@@ -96,7 +134,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the number of attempts.
      */
-    public function getAttempts(): int
+    final public function getAttempts(): int
     {
         return $this->attempts;
     }
@@ -104,7 +142,7 @@ abstract class Job implements JsonSerializable
     /**
      * Set the number of attempts.
      */
-    public function setAttempts(int $attempts): self
+    final public function setAttempts(int $attempts): self
     {
         if ($attempts < 0) {
             throw new InvalidArgumentException('Attempts cannot be negative');
@@ -118,7 +156,7 @@ abstract class Job implements JsonSerializable
     /**
      * Increment the attempt count.
      */
-    public function incrementAttempts(): self
+    final public function incrementAttempts(): self
     {
         $this->attempts++;
 
@@ -128,7 +166,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the queue name.
      */
-    public function getQueue(): string
+    final public function getQueue(): string
     {
         return $this->queue;
     }
@@ -158,7 +196,7 @@ abstract class Job implements JsonSerializable
     /**
      * Set the delay in seconds.
      */
-    public function delay(int $seconds): self
+    final public function delay(int $seconds): self
     {
         if ($seconds < 0) {
             throw new InvalidArgumentException('Delay cannot be negative');
@@ -172,7 +210,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the maximum number of attempts.
      */
-    public function getMaxAttempts(): int
+    final public function getMaxAttempts(): int
     {
         return $this->maxAttempts;
     }
@@ -180,7 +218,7 @@ abstract class Job implements JsonSerializable
     /**
      * Set the maximum number of attempts.
      */
-    public function tries(int $attempts): self
+    final public function tries(int $attempts): self
     {
         if ($attempts < 1) {
             throw new InvalidArgumentException('Max attempts must be at least 1');
@@ -194,7 +232,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the retry delay in seconds.
      */
-    public function getRetryDelay(): int
+    final public function getRetryDelay(): int
     {
         return $this->retryDelay;
     }
@@ -202,7 +240,7 @@ abstract class Job implements JsonSerializable
     /**
      * Set the retry delay in seconds.
      */
-    public function retryAfter(int $seconds): self
+    final public function retryAfter(int $seconds): self
     {
         if ($seconds < 0) {
             throw new InvalidArgumentException('Retry delay cannot be negative');
@@ -216,7 +254,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the job priority.
      */
-    public function getPriority(): int
+    final public function getPriority(): int
     {
         return $this->priority;
     }
@@ -224,7 +262,7 @@ abstract class Job implements JsonSerializable
     /**
      * Set the job priority.
      */
-    public function priority(int $priority): self
+    final public function priority(int $priority): self
     {
         if ($priority < 0) {
             throw new InvalidArgumentException('Priority cannot be negative');
@@ -238,7 +276,7 @@ abstract class Job implements JsonSerializable
     /**
      * Get the job timeout in seconds.
      */
-    public function getTimeout(): int
+    final public function getTimeout(): int
     {
         return $this->timeout;
     }
@@ -246,7 +284,7 @@ abstract class Job implements JsonSerializable
     /**
      * Set the job timeout in seconds.
      */
-    public function timeout(int $seconds): self
+    final public function timeout(int $seconds): self
     {
         if ($seconds <= 0) {
             throw new InvalidArgumentException('Timeout must be positive');
@@ -284,47 +322,9 @@ abstract class Job implements JsonSerializable
     }
 
     /**
-     * Create a Job instance from a JobPayload.
-     */
-    public static function fromPayload(JobPayloadInterface $payload): static
-    {
-        $data = $payload->getData();
-        $options = $payload->getOptions();
-
-        // Get the job class from options
-        $jobClass = $options['class'] ?? static::class;
-
-        if (!class_exists($jobClass)) {
-            throw new InvalidArgumentException("Job class {$jobClass} does not exist");
-        }
-
-        if (!is_subclass_of($jobClass, self::class)) {
-            throw new InvalidArgumentException("Job class {$jobClass} must extend " . self::class);
-        }
-
-        // Create job instance
-        $job = new $jobClass();
-
-        // Restore job state from data
-        $job->restoreFromData($data);
-
-        // Restore job metadata
-        $job->id = $payload->getId();
-        $job->attempts = $payload->getAttempts();
-        $job->queue = $options['queue'] ?? 'default';
-        $job->delay = $options['delay'] ?? 0;
-        $job->maxAttempts = $options['max_attempts'] ?? 1;
-        $job->retryDelay = $options['retry_delay'] ?? 0;
-        $job->priority = $options['priority'] ?? 0;
-        $job->timeout = $options['timeout'] ?? 60;
-
-        return $job;
-    }
-
-    /**
      * Serialize the job to JSON.
      */
-    public function jsonSerialize(): array
+    final public function jsonSerialize(): array
     {
         $reflection = new ReflectionClass($this);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PRIVATE);
@@ -346,6 +346,14 @@ abstract class Job implements JsonSerializable
     }
 
     /**
+     * Get a display name for this job.
+     */
+    final public function displayName(): string
+    {
+        return static::class;
+    }
+
+    /**
      * Restore job state from serialized data.
      */
     protected function restoreFromData(array $data): void
@@ -359,13 +367,5 @@ abstract class Job implements JsonSerializable
                 $property->setValue($this, $value);
             }
         }
-    }
-
-    /**
-     * Get a display name for this job.
-     */
-    public function displayName(): string
-    {
-        return static::class;
     }
 }

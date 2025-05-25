@@ -7,18 +7,14 @@ namespace Tests\Unit\Core;
 use FlowCore\Contracts\JobPayloadInterface;
 use FlowCore\Contracts\QueueDriverInterface;
 use FlowCore\Core\Job;
-use FlowCore\Core\JobPayload;
 use FlowCore\Core\QueueManager;
-use FlowCore\Support\Exceptions\QueueException;
-use InvalidArgumentException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
-use Tests\Support\TestQueueJob;
 
 final class QueueManagerTest extends TestCase
 {
     private QueueDriverInterface&MockObject $driver;
+
     private QueueManager $manager;
 
     protected function setUp(): void
@@ -33,7 +29,7 @@ final class QueueManagerTest extends TestCase
         $job = $this->createMock(Job::class);
         $payload = $this->createMock(JobPayloadInterface::class);
 
-        $job->method('getQueue')->willReturn('default');
+        // $job->method('getQueue')->willReturn('default');
         $job->method('getDelay')->willReturn(0);
         $job->method('toPayload')->willReturn($payload);
         $payload->method('getId')->willReturn('');
@@ -47,6 +43,7 @@ final class QueueManagerTest extends TestCase
 
     public function test_later_delegates_to_driver_and_returns_job_id(): void
     {
+        /** @var Job|MockObject $job */
         $job = $this->createMock(Job::class);
         $payload = $this->createMock(JobPayloadInterface::class);
 
@@ -100,7 +97,7 @@ final class QueueManagerTest extends TestCase
         $this->manager->clear('queue');
     }
 
-    public function test_getQueues_delegates_to_driver(): void
+    public function test_get_queues_delegates_to_driver(): void
     {
         $this->driver->expects($this->once())->method('queues')->willReturn(['queue1', 'queue2']);
         $this->assertSame(['queue1', 'queue2'], $this->manager->getQueues());
@@ -138,6 +135,7 @@ final class QueueManagerTest extends TestCase
 
     public function test_add_and_has_connection(): void
     {
+        /** @var QueueDriverInterface $mockDriver */
         $mockDriver = $this->createMock(QueueDriverInterface::class);
         $this->manager->addConnection('foo', $mockDriver);
         $this->assertTrue($this->manager->hasConnection('foo'));
@@ -149,8 +147,9 @@ final class QueueManagerTest extends TestCase
         $this->assertSame('foo', $this->manager->getDefaultConnection());
     }
 
-    public function test_getConnectionNames_returns_all_names(): void
+    public function test_get_connection_names_returns_all_names(): void
     {
+        /** @var QueueDriverInterface $mockDriver */
         $mockDriver = $this->createMock(QueueDriverInterface::class);
         $this->manager->addConnection('foo', $mockDriver);
         $names = $this->manager->getConnectionNames();
@@ -158,7 +157,7 @@ final class QueueManagerTest extends TestCase
         $this->assertContains('foo', $names);
     }
 
-    public function test_getConnectionInfo_returns_expected_keys(): void
+    public function test_get_connection_info_returns_expected_keys(): void
     {
         $info = $this->manager->getConnectionInfo();
         $this->assertArrayHasKey('name', $info);
@@ -169,7 +168,7 @@ final class QueueManagerTest extends TestCase
         $this->assertArrayHasKey('supports_streaming', $info);
     }
 
-    public function test_getStats_returns_stats_for_queues(): void
+    public function test_get_stats_returns_stats_for_queues(): void
     {
         $this->driver->method('size')->willReturn(2);
         $this->driver->method('queues')->willReturn(['queue1']);

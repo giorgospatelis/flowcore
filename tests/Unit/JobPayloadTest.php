@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Unit;
 
-use FlowCore\Core\JobPayload;
 use FlowCore\Contracts\JobPayloadInterface;
+use FlowCore\Core\JobPayload;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
-class JobPayloadTest extends TestCase
+final class JobPayloadTest extends TestCase
 {
     private JobPayload $jobPayload;
 
@@ -17,10 +17,10 @@ class JobPayloadTest extends TestCase
     {
         $this->jobPayload = new JobPayload([
             'user_id' => 123,
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ], [
             'priority' => 1,
-            'max_attempts' => 3
+            'max_attempts' => 3,
         ]);
     }
 
@@ -66,7 +66,7 @@ class JobPayloadTest extends TestCase
     {
         $expected = [
             'user_id' => 123,
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ];
 
         $this->assertSame($expected, $this->jobPayload->getData());
@@ -76,7 +76,7 @@ class JobPayloadTest extends TestCase
     {
         $expected = [
             'priority' => 1,
-            'max_attempts' => 3
+            'max_attempts' => 3,
         ];
 
         $this->assertSame($expected, $this->jobPayload->getOptions());
@@ -145,13 +145,13 @@ class JobPayloadTest extends TestCase
             'id' => 'test-id',
             'data' => [
                 'user_id' => 123,
-                'email' => 'test@example.com'
+                'email' => 'test@example.com',
             ],
             'options' => [
                 'priority' => 1,
-                'max_attempts' => 3
+                'max_attempts' => 3,
             ],
-            'attempts' => 1
+            'attempts' => 1,
         ];
 
         $this->assertSame($expected, $decoded);
@@ -163,7 +163,7 @@ class JobPayloadTest extends TestCase
             'id' => 'test-job-id',
             'data' => ['user_id' => 456],
             'options' => ['priority' => 2],
-            'attempts' => 3
+            'attempts' => 3,
         ];
 
         $serialized = json_encode($data);
@@ -175,7 +175,6 @@ class JobPayloadTest extends TestCase
         $this->assertSame(['priority' => 2], $payload->getOptions());
         $this->assertSame(3, $payload->getAttempts());
     }
-
 
     public function test_unserialize_throws_exception_for_invalid_json(): void
     {
@@ -209,7 +208,7 @@ class JobPayloadTest extends TestCase
             'id' => 123, // should be string
             'data' => [],
             'options' => [],
-            'attempts' => 0
+            'attempts' => 0,
         ];
 
         $this->expectException(InvalidArgumentException::class);

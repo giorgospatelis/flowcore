@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'default' => $_ENV['FLOWCORE_QUEUE_DRIVER'] ?? 'redis',
 

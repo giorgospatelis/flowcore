@@ -106,7 +106,7 @@ final class InMemoryDriver implements QueueDriverInterface
     {
         $this->processDelayed($queue);
 
-        return array_filter($this->delayed[$queue] ?? [], fn(array $job): bool => $job['available_at'] <= $timestamp);
+        return array_filter($this->delayed[$queue] ?? [], fn (array $job): bool => $job['available_at'] <= $timestamp);
     }
 
     public function pushBatch(string $queue, array $payloads): array

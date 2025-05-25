@@ -76,7 +76,7 @@ interface QueueManagerInterface
     /**
      * Get a connection by name.
      */
-    public function connection(string $name = null): QueueDriverInterface;
+    public function connection(?string $name = null): QueueDriverInterface;
 
     /**
      * Set the default connection.
@@ -86,5 +86,5 @@ interface QueueManagerInterface
     /**
      * Get connection info and statistics.
      */
-    public function getConnectionInfo(string $name = null): array;
+    public function getConnectionInfo(?string $name = null): array;
 }

@@ -6,4 +6,6 @@ namespace FlowCore\Support\Exceptions;
 
 use Exception;
 
-class JobException extends Exception {}
+final class JobException extends Exception
+{
+}

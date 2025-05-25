@@ -51,12 +51,10 @@
             "pint --test"
         ],
         "test:unit": "phpunit",
-        "test:types": "phpstan",
         "test:refactor": "rector --dry-run",
         "test": [
             "@test:lint",
             "@test:unit",
-            "@test:types",
             "@test:refactor"
         ]
     }

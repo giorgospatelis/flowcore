@@ -28,7 +28,8 @@ final readonly class DatabaseDriver implements QueueDriverInterface
             "INSERT INTO {$this->table}
             (id, queue, payload, status, priority, attempts, created_at, available_at)
             VALUES (?, ?, ?, 'pending', ?, 0, ?, ?)
-            ");
+            "
+        );
         $stmt->execute([
             $id,
             $queue,
@@ -142,7 +143,7 @@ final readonly class DatabaseDriver implements QueueDriverInterface
         $stmt->execute([':queue' => $queue, ':timestamp' => $timestamp]);
         $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        return array_map(fn(array $jobData): \FlowCore\Contracts\JobPayloadInterface => JobPayloadInterface::unserialize($jobData['data']), $jobs);
+        return array_map(fn (array $jobData): JobPayloadInterface => JobPayloadInterface::unserialize($jobData['data']), $jobs);
     }
 
     public function pushBatch(string $queue, array $payloads): array
@@ -173,7 +174,7 @@ final readonly class DatabaseDriver implements QueueDriverInterface
             $this->ack($queue, $jobData['job_id']);
         }
 
-        return array_map(fn(array $jobData): \FlowCore\Contracts\JobPayloadInterface => JobPayloadInterface::unserialize($jobData['data']), $jobsData);
+        return array_map(fn (array $jobData): JobPayloadInterface => JobPayloadInterface::unserialize($jobData['data']), $jobsData);
     }
 
     public function supportsPriority(): bool

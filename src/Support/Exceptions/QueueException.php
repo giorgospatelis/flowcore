@@ -6,4 +6,6 @@ namespace FlowCore\Support\Exceptions;
 
 use Exception;
 
-class QueueException extends Exception {}
+final class QueueException extends Exception
+{
+}
